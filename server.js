@@ -8,7 +8,11 @@ const socketIo = require('socket.io');
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
+const optiones={
+  origin: 'https://commentes.vercel.app/',
+  credentials: true,
+}
+app.use(cors(optiones));
 app.use(bodyParser.json());
 
 // Connect to MongoDB
