@@ -11,6 +11,8 @@ const PORT = 3001;
 const optiones={
   origin: 'https://commentes.vercel.app',
   credentials: true,
+  methods: ["GET", "POST"],
+  transports: ['websocket', 'polling']
 }
 app.use(cors(optiones));
 app.use(bodyParser.json());
@@ -44,9 +46,9 @@ const Restaurant = mongoose.model('Restaurant', restaurantSchema);
 // Create an HTTP server and integrate socket.io
 const server = http.createServer(app);
 const io = socketIo(server);
-
+const socketIoNamespace = io.of('/socket');
 // Socket.io connection event
-io.on('connection', (socket) => {
+socketIoNamespace.on('connection', (socket) => {
   console.log('A user connected');
 
   // Handle disconnection
