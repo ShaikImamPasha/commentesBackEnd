@@ -6,19 +6,23 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 const app = express();
-const PORT = 3001;
+const server = http.createServer(app);
+const io = socketIo(server);
 
-const optiones={
+const PORT = process.env.PORT || 3002;
+
+const options = {
   origin: 'https://commentes.vercel.app',
   credentials: true,
   methods: ["GET", "POST"],
   transports: ['websocket', 'polling']
 }
-app.use(cors(optiones));
+
+app.use(cors(options));
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://travalapp:travalapp@cluster0.oz5xxmc.mongodb.net/');
+mongoose.connect(mongooUrl,{ useNewUrlParser: true, useUnifiedTopology: true });
 
 // Create a Mongoose schema for comments
 const commentSchema = new mongoose.Schema({
@@ -40,12 +44,8 @@ const restaurantSchema = new mongoose.Schema({
 
 const Restaurant = mongoose.model('Restaurant', restaurantSchema);
 
-// Create an HTTP server and integrate socket.io
-const server = http.createServer(app);
-const io = socketIo(server);
-const socketIoNamespace = io.of('/socket');
 // Socket.io connection event
-socketIoNamespace.on('connection', (socket) => {
+io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Handle disconnection
@@ -54,10 +54,6 @@ socketIoNamespace.on('connection', (socket) => {
   });
 
   // Handle the socket event to add a new comment
-
-  
-
-
   socket.on('addComment', async ({ restaurantId, newComment }) => {
     try {
       let restaurant = await Restaurant.findOne({ restaurantId });
@@ -72,9 +68,9 @@ socketIoNamespace.on('connection', (socket) => {
         // If the restaurant exists, add the comment
         restaurant.comments.push(newComment);
       }
-    
+
       await restaurant.save();
-   let allData=await Restaurant.find({});
+      let allData = await Restaurant.find({});
 
       // Emit a socket event to notify connected clients about the new comment
       io.emit('newComment', restaurant);
@@ -92,7 +88,7 @@ socketIoNamespace.on('connection', (socket) => {
         res.status(404).send('Restaurant or comment not found');
         return;
       }
-  
+
       // If the restaurant and comment exist, add the reply
       restaurant.comments[commentIndex].replies.push(newReply);
       await restaurant.save();
@@ -104,10 +100,11 @@ socketIoNamespace.on('connection', (socket) => {
       socket.emit('replyError', 'Internal Server Error');
     }
   });
+
   socket.on('requestInitialData', async ({ restaurantId }) => {
     try {
       const restaurant = await Restaurant.findOne({ restaurantId });
-  
+
       if (restaurant) {
         // If the restaurant exists, emit the initial data
         socket.emit('initialData', restaurant);
@@ -118,6 +115,9 @@ socketIoNamespace.on('connection', (socket) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
