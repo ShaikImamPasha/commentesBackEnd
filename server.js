@@ -9,7 +9,7 @@ const app = express();
 const PORT = 3001;
 
 const optiones={
-  origin: 'https://commentes.vercel.app/',
+  origin: 'https://commentes.vercel.app',
   credentials: true,
 }
 app.use(cors(optiones));
