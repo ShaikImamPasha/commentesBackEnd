@@ -22,7 +22,7 @@ app.use(cors(options));
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-mongoose.connect(mongooUrl,{ useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://travalapp:travalapp@cluster0.oz5xxmc.mongodb.net/',{ useNewUrlParser: true, useUnifiedTopology: true });
 
 // Create a Mongoose schema for comments
 const commentSchema = new mongoose.Schema({
