@@ -9,20 +9,15 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server,{
   cors: {
-    origin: '*',
-  }
+    origin: true,
+    credentials: true,
+  },
+  allowEIO3: true,
 });
 
 const PORT = process.env.PORT || 3002;
 
-const options = {
-  origin: 'https://commentes.vercel.app',
-  credentials: true,
-  methods: ["GET", "POST"],
-  transports: ['websocket', 'polling']
-}
 
-app.use(cors(options));
 app.use(bodyParser.json());
 
 // Connect to MongoDB
