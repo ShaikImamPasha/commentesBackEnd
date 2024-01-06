@@ -17,7 +17,7 @@ const io = socketIo(server,{
 
 const PORT = process.env.PORT || 3002;
 
-
+app.use(cors());
 app.use(bodyParser.json());
 
 // Connect to MongoDB
