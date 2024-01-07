@@ -40,9 +40,14 @@ const restaurantSchema = new mongoose.Schema({
   restaurantId: Number,
   comments: [commentSchema],
 });
+const reasturentUser = new mongoose.Schema({
+  name: String,
+  password: String,
+  gmail: String
+});
 
 const Restaurant = mongoose.model('Restaurant', restaurantSchema);
-
+const User = mongoose.model('reasturentUser', reasturentUser);
 // Socket.io connection event
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -113,6 +118,47 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+
+app.post('/create/users', async (req, res) => {
+  const { name, password, gmail } = req.body;
+
+  // Basic validation (you should add more)
+  if (!name || !password || !gmail) {
+    return res.status(400).json({ error: 'Invalid request. Missing required fields.' });
+  }
+
+  // Create a new user and save it to MongoDB
+  const newUser = new User({ name, password, gmail });
+
+  try {
+    const savedUser = await newUser.save();
+    return res.status(201).json({ message: 'User created successfully.', user: savedUser });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to create user.' });
+  }
+});
+
+app.post('/api/login',async (req, res) => {
+  const { gmail, password } = req.body;
+
+  // Basic validation (you should add more)
+  if (!gmail || !password) {
+    return res.status(400).json({ error: 'Invalid request. Missing required fields.' });
+  }
+
+  // Find the user in the in-memory storage (replace this with database lookup)
+  const user = await User.findOne({ gmail, password });
+  console.log(user.name);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials. User not found or incorrect password.' });
+  }
+
+  return res.status(200).json({ message: 'Login successful.', user });
+});
+
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
